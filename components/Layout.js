@@ -1,8 +1,8 @@
 import classNames from 'classnames';
-import { useEffect } from 'react';
+import { useEffect, useCallback, memo } from 'react';
 import styles from './Layout.module.css';
 
-export function GradientBackground({ variant, className }) {
+export const GradientBackground = memo(function GradientBackground({ variant, className }) {
   const classes = classNames(
     {
       [styles.colorBackground]: variant === 'large',
@@ -12,42 +12,45 @@ export function GradientBackground({ variant, className }) {
   );
 
   return <div className={classes} />;
-}
+});
 
 export default function Layout({ children }) {
-  const setAppTheme = () => {
-    const darkMode = localStorage.getItem('theme') === 'dark';
-    const lightMode = localStorage.getItem('theme') === 'light';
+  const setAppTheme = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const theme = localStorage.getItem('theme');
+    const darkMode = theme === 'dark';
+    const lightMode = theme === 'light';
 
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else if (lightMode) {
       document.documentElement.classList.remove('dark');
     }
-    return;
-  };
+  }, []);
 
-  const handleSystemThemeChange = () => {
-    var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const handleSystemThemeChange = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    darkQuery.onchange = (e) => {
-      if (e.matches) {
-        document.documentElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      }
+    const handleChange = (e) => {
+      const theme = e.matches ? 'dark' : 'light';
+      document.documentElement.classList.toggle('dark', e.matches);
+      localStorage.setItem('theme', theme);
     };
-  };
+
+    darkQuery.addEventListener('change', handleChange);
+    
+    // Return cleanup function
+    return () => darkQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     setAppTheme();
-  }, []);
-
-  useEffect(() => {
-    handleSystemThemeChange();
-  }, []);
+    const cleanup = handleSystemThemeChange();
+    return cleanup;
+  }, [setAppTheme, handleSystemThemeChange]);
 
   return (
     <div className="relative pb-24 overflow-hidden">

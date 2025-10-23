@@ -1,12 +1,24 @@
 import '../styles/globals.css';
-import 'prismjs/themes/prism-tomorrow.css';
+import '../styles/prism.css';
+import { memo } from 'react';
+import PerformanceMonitor from '../components/PerformanceMonitor';
 
-function MyApp({ Component, pageProps }) {
+// Theme component to avoid unnecessary DOM elements
+const ThemeProvider = memo(function ThemeProvider({ children }) {
   return (
     <>
       <span className="theme-bejamas" />
-      <Component {...pageProps} />
+      {children}
     </>
+  );
+});
+
+function MyApp({ Component, pageProps }) {
+  return (
+    <ThemeProvider>
+      <PerformanceMonitor />
+      <Component {...pageProps} />
+    </ThemeProvider>
   );
 }
 

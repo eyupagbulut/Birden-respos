@@ -14,6 +14,18 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  /* Critical CSS - loaded inline */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    font-family: var(--font-secondary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   h1,
   h2,
   h3,
@@ -22,8 +34,16 @@
   h6 {
     font-family: var(--font-primary);
   }
-
-  body {
-    font-family: var(--font-secondary);
+  
+  /* Optimize focus styles for better accessibility */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary');
+    outline-offset: 2px;
+  }
+  
+  /* Improve image loading */
+  img {
+    height: auto;
+    max-width: 100%;
   }
 }
