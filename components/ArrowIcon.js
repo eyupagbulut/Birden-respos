@@ -1,4 +1,6 @@
-export default function ArrowIcon({ className, color = 'text-primary' }) {
+import { memo } from 'react';
+
+export default memo(function ArrowIcon({ className, color = 'text-primary' }) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -7,6 +9,7 @@ export default function ArrowIcon({ className, color = 'text-primary' }) {
       fill="none"
       viewBox="0 0 24 24"
       className={className}
+      aria-hidden="true"
     >
       <path
         className={`stroke-current ${color}`}
@@ -17,4 +20,4 @@ export default function ArrowIcon({ className, color = 'text-primary' }) {
       ></path>
     </svg>
   );
-}
+});

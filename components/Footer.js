@@ -1,3 +1,5 @@
+import { memo, useCallback } from 'react';
+
 const sunIcon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -6,6 +8,7 @@ const sunIcon = (
     fill="none"
     viewBox="0 0 25 24"
     className="dark:opacity-50"
+    aria-hidden="true"
   >
     <g
       stroke="#fff"
@@ -35,6 +38,7 @@ const moonIcon = (
     height="20"
     fill="none"
     viewBox="0 0 21 20"
+    aria-hidden="true"
   >
     <path
       stroke="#fff"
@@ -47,16 +51,23 @@ const moonIcon = (
   </svg>
 );
 
-const ThemeSwitcher = () => {
+const ThemeSwitcher = memo(function ThemeSwitcher() {
+  const handleDarkMode = useCallback(() => {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  }, []);
+
+  const handleLightMode = useCallback(() => {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }, []);
+
   return (
     <div className="flex justify-center p-1 mt-6 bg-white dark:bg-gray-900 rounded-3xl">
       <button
         type="button"
         aria-label="Use Dark Mode"
-        onClick={() => {
-          document.documentElement.classList.add('dark');
-          localStorage.setItem('theme', 'dark');
-        }}
+        onClick={handleDarkMode}
         className="flex items-center justify-center w-24 h-10 p-2 pr-2 transition cursor-pointer dark:bg-primary rounded-3xl align-center"
       >
         {moonIcon}
@@ -65,19 +76,16 @@ const ThemeSwitcher = () => {
       <button
         type="button"
         aria-label="Use Light Mode"
-        onClick={() => {
-          document.documentElement.classList.remove('dark');
-          localStorage.setItem('theme', 'light');
-        }}
+        onClick={handleLightMode}
         className="flex items-center justify-center w-24 h-10 p-2 pr-2 transition cursor-pointer bg-primary dark:bg-transparent rounded-3xl align-center"
       >
         {sunIcon}
       </button>
     </div>
   );
-};
+});
 
-export default function Footer({ copyrightText }) {
+export default memo(function Footer({ copyrightText }) {
   return (
     <footer className="flex flex-col items-center py-16">
       <p className="mb-3 font-bold uppercase dark:text-white opacity-60">
@@ -86,4 +94,4 @@ export default function Footer({ copyrightText }) {
       <ThemeSwitcher />
     </footer>
   );
-}
+});

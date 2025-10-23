@@ -2,12 +2,16 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 import { serialize } from 'next-mdx-remote/serialize';
-import rehypePrism from '@mapbox/rehype-prism';
 import remarkGfm from 'remark-gfm';
 import rehypeUnwrapImages from 'rehype-unwrap-images';
 
 // POSTS_PATH is useful when you want to get the path to a specific file
 export const POSTS_PATH = path.join(process.cwd(), 'posts');
+
+// Cache for posts to avoid repeated file system reads
+let postsCache = null;
+let postsCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // getPostFilePaths is the list of all mdx files inside the POSTS_PATH directory
 export const getPostFilePaths = () => {
@@ -28,6 +32,13 @@ export const sortPostsByDate = (posts) => {
 };
 
 export const getPosts = () => {
+  const now = Date.now();
+  
+  // Return cached posts if still valid
+  if (postsCache && (now - postsCacheTime) < CACHE_DURATION) {
+    return postsCache;
+  }
+
   let posts = getPostFilePaths().map((filePath) => {
     const source = fs.readFileSync(path.join(POSTS_PATH, filePath));
     const { content, data } = matter(source);
@@ -40,6 +51,10 @@ export const getPosts = () => {
   });
 
   posts = sortPostsByDate(posts);
+  
+  // Cache the result
+  postsCache = posts;
+  postsCacheTime = now;
 
   return posts;
 };
@@ -49,6 +64,9 @@ export const getPostBySlug = async (slug) => {
   const source = fs.readFileSync(postFilePath);
 
   const { content, data } = matter(source);
+
+  // Dynamically import rehype-prism only when needed
+  const rehypePrism = (await import('@mapbox/rehype-prism')).default;
 
   const mdxSource = await serialize(content, {
     // Optionally pass remark/rehype plugins
