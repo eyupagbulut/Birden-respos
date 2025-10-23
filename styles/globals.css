@@ -14,6 +14,14 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   h1,
   h2,
   h3,
@@ -21,9 +29,51 @@
   h5,
   h6 {
     font-family: var(--font-primary);
+    font-weight: 600;
+    line-height: 1.2;
   }
 
   body {
     font-family: var(--font-secondary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Optimize rendering performance */
+  .backdrop-blur-lg {
+    will-change: transform;
+  }
+
+  /* Reduce layout shifts */
+  img {
+    height: auto;
+  }
+
+  /* Focus styles for accessibility */
+  .focus\:outline-hidden:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .focus\:ring-4:focus {
+    box-shadow: 0 0 0 4px rgba(125, 122, 255, 0.5);
+  }
+}
+
+@layer utilities {
+  /* Performance optimizations */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .will-change-opacity {
+    will-change: opacity;
   }
 }

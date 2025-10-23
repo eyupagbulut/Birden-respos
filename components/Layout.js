@@ -1,8 +1,8 @@
 import classNames from 'classnames';
-import { useEffect } from 'react';
+import { useEffect, memo, useCallback } from 'react';
 import styles from './Layout.module.css';
 
-export function GradientBackground({ variant, className }) {
+export const GradientBackground = memo(function GradientBackground({ variant, className }) {
   const classes = classNames(
     {
       [styles.colorBackground]: variant === 'large',
@@ -12,10 +12,12 @@ export function GradientBackground({ variant, className }) {
   );
 
   return <div className={classes} />;
-}
+});
 
 export default function Layout({ children }) {
-  const setAppTheme = () => {
+  const setAppTheme = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
     const darkMode = localStorage.getItem('theme') === 'dark';
     const lightMode = localStorage.getItem('theme') === 'light';
 
@@ -24,13 +26,14 @@ export default function Layout({ children }) {
     } else if (lightMode) {
       document.documentElement.classList.remove('dark');
     }
-    return;
-  };
+  }, []);
 
-  const handleSystemThemeChange = () => {
-    var darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  const handleSystemThemeChange = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    darkQuery.onchange = (e) => {
+    const handleChange = (e) => {
       if (e.matches) {
         document.documentElement.classList.add('dark');
         localStorage.setItem('theme', 'dark');
@@ -39,15 +42,17 @@ export default function Layout({ children }) {
         localStorage.setItem('theme', 'light');
       }
     };
-  };
+
+    darkQuery.addEventListener('change', handleChange);
+    
+    return () => darkQuery.removeEventListener('change', handleChange);
+  }, []);
 
   useEffect(() => {
     setAppTheme();
-  }, []);
-
-  useEffect(() => {
-    handleSystemThemeChange();
-  }, []);
+    const cleanup = handleSystemThemeChange();
+    return cleanup;
+  }, [setAppTheme, handleSystemThemeChange]);
 
   return (
     <div className="relative pb-24 overflow-hidden">
