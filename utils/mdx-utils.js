@@ -27,7 +27,19 @@ export const sortPostsByDate = (posts) => {
   });
 };
 
+// Cache for posts to avoid re-reading files
+let postsCache = null;
+let postsCacheTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export const getPosts = () => {
+  const now = Date.now();
+  
+  // Return cached posts if still valid
+  if (postsCache && (now - postsCacheTime) < CACHE_DURATION) {
+    return postsCache;
+  }
+
   let posts = getPostFilePaths().map((filePath) => {
     const source = fs.readFileSync(path.join(POSTS_PATH, filePath));
     const { content, data } = matter(source);
@@ -40,6 +52,10 @@ export const getPosts = () => {
   });
 
   posts = sortPostsByDate(posts);
+  
+  // Cache the results
+  postsCache = posts;
+  postsCacheTime = now;
 
   return posts;
 };
