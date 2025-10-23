@@ -1,12 +1,6 @@
-import { getGlobalData } from '../../utils/global-data';
-import {
-  getNextPostBySlug,
-  getPostBySlug,
-  getPreviousPostBySlug,
-  getPostFilePaths,
-} from '../../utils/mdx-utils';
 
 import { MDXRemote } from 'next-mdx-remote';
+import 'prismjs/themes/prism-tomorrow.css';
 import Head from 'next/head';
 import Link from 'next/link';
 import ArrowIcon from '../../components/ArrowIcon';
@@ -14,7 +8,8 @@ import CustomImage from '../../components/CustomImage';
 import CustomLink from '../../components/CustomLink';
 import Footer from '../../components/Footer';
 import Header from '../../components/Header';
-import Layout, { GradientBackground } from '../../components/Layout';
+import Layout from '../../components/Layout';
+import GradientBackground from '../../components/GradientBackground';
 import SEO from '../../components/SEO';
 
 // Custom components/renderers to pass to MDX.
@@ -71,6 +66,7 @@ export default function PostPage({
           {prevPost && (
             <Link
               href={`/posts/${prevPost.slug}`}
+              prefetch={false}
               className="flex flex-col px-10 py-8 text-center transition border border-gray-800/10 bg-white/10 md:text-right first:rounded-t-lg md:first:rounded-tr-none md:first:rounded-l-lg last:rounded-r-lg last:rounded-b-lg backdrop-blur-lg dark:bg-black/30 hover:bg-white/20 dark:hover:bg-black/50 dark:border-white/10 last:border-t md:border-r-0 md:last:border-r md:last:rounded-r-none"
             >
               <p className="mb-4 text-gray-500 uppercase dark:text-white dark:opacity-60">
@@ -85,6 +81,7 @@ export default function PostPage({
           {nextPost && (
             <Link
               href={`/posts/${nextPost.slug}`}
+              prefetch={false}
               className="flex flex-col px-10 py-8 text-center transition border border-t-0 border-b-0 border-gray-800/10 bg-white/10 md:text-left md:first:rounded-t-lg last:rounded-b-lg first:rounded-l-lg md:last:rounded-bl-none md:last:rounded-r-lg backdrop-blur-lg dark:bg-black/30 hover:bg-white/20 dark:hover:bg-black/50 dark:border-white/10 first:border-t first:rounded-t-lg md:border-t last:border-b"
             >
               <p className="mb-4 text-gray-500 uppercase dark:text-white dark:opacity-60">
@@ -112,6 +109,10 @@ export default function PostPage({
 }
 
 export const getStaticProps = async ({ params }) => {
+  const [{ getGlobalData }, { getPostBySlug, getPreviousPostBySlug, getNextPostBySlug }] = await Promise.all([
+    import('../../utils/global-data'),
+    import('../../utils/mdx-utils'),
+  ]);
   const globalData = getGlobalData();
   const { mdxSource, data } = await getPostBySlug(params.slug);
   const prevPost = getPreviousPostBySlug(params.slug);
@@ -130,6 +131,7 @@ export const getStaticProps = async ({ params }) => {
 };
 
 export const getStaticPaths = async () => {
+  const { getPostFilePaths } = await import('../../utils/mdx-utils');
   const paths = getPostFilePaths()
     // Remove file extensions for page paths
     .map((path) => path.replace(/\.mdx?$/, ''))

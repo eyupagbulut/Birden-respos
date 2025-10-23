@@ -1,11 +1,10 @@
 import Link from 'next/link';
-import { getPosts } from '../utils/mdx-utils';
 
 import Footer from '../components/Footer';
 import Header from '../components/Header';
-import Layout, { GradientBackground } from '../components/Layout';
+import Layout from '../components/Layout';
+import GradientBackground from '../components/GradientBackground';
 import ArrowIcon from '../components/ArrowIcon';
-import { getGlobalData } from '../utils/global-data';
 import SEO from '../components/SEO';
 
 export default function Index({ posts, globalData }) {
@@ -27,6 +26,7 @@ export default function Index({ posts, globalData }) {
               <Link
                 as={`/posts/${post.filePath.replace(/\.mdx?$/, '')}`}
                 href={`/posts/[slug]`}
+                prefetch={false}
                 className="block px-6 py-6 lg:py-10 lg:px-16 focus:outline-hidden focus:ring-4 focus:ring-primary/50"
               >
                 {post.data.date && (
@@ -67,7 +67,11 @@ export default function Index({ posts, globalData }) {
   );
 }
 
-export function getStaticProps() {
+export async function getStaticProps() {
+  const [{ getPosts }, { getGlobalData }] = await Promise.all([
+    import('../utils/mdx-utils'),
+    import('../utils/global-data'),
+  ]);
   const posts = getPosts();
   const globalData = getGlobalData();
 
